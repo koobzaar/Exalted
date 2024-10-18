@@ -2,7 +2,27 @@ import Versions from './components/Versions'
 import electronLogo from './assets/electron.svg'
 
 function App(): JSX.Element {
-  const ipcHandle = (): void => window.electron.ipcRenderer.send('test')
+  // Defina o tipo LoLSkins
+  type LoLSkinCatalog = {
+    id: {
+      name: string
+      downloadUrl: string
+    }
+  }
+
+  const ipcHandle = async (): Promise<LoLSkinCatalog[]> => {
+    const skins = await window.electron.ipcRenderer.invoke('get-lol-catalog')
+    return skins as LoLSkinCatalog[]
+  }
+
+  ipcHandle()
+    .then((skins) => {
+      console.log(skins)
+    })
+    .catch((error) => {
+      console.error('Erro ao obter o catálogo de skins:', error)
+    })
+
   return (
     <>
       <img alt="logo" className="logo" src={electronLogo} />
