@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png'
 import getLoLSkins from '../services/github'
+import processChampionSkins from '../services/datadragon'
 
 async function createWindow(): Promise<void> {
   // Create the browser window.
@@ -53,7 +54,11 @@ app.whenReady().then(async () => {
   // IPC test
   ipcMain.handle('get-lol-catalog', async () => {
     const skins = await getLoLSkins()
-    return skins
+    const processed_champions_skins = await processChampionSkins(skins)
+    console.log(processed_champions_skins)
+    console.log(processed_champions_skins['Naafiri'])
+    console.log(processed_champions_skins['Naafiri'][2]['chromas'])
+    return processed_champions_skins
   })
 
   await createWindow()
