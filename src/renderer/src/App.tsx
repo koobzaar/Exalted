@@ -15,13 +15,15 @@ function App(): JSX.Element {
     return skins as LoLSkinCatalog[]
   }
 
-  ipcHandle()
-    .then((skins) => {
-      console.log(skins)
-    })
-    .catch((error) => {
-      console.error('Erro ao obter o catálogo de skins:', error)
-    })
+  const handleClick = (): void => {
+    ipcHandle()
+      .then((skins) => {
+        console.log(skins)
+      })
+      .catch((error) => {
+        console.error('Erro ao obter o catálogo de skins:', error)
+      })
+  }
 
   return (
     <>
@@ -41,7 +43,7 @@ function App(): JSX.Element {
           </a>
         </div>
         <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
+          <a target="_blank" rel="noreferrer" onClick={handleClick}>
             Send IPC
           </a>
         </div>

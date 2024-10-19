@@ -3,7 +3,9 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png'
 import getLoLSkins from '../services/github'
-import processChampionSkins from '../services/datadragon'
+import processChampionSkins from '../services/data_dragon'
+import patchClientWithMod from '../services/mod_injector'
+import downloadFile from '../services/downloader'
 
 async function createWindow(): Promise<void> {
   // Create the browser window.
@@ -57,7 +59,20 @@ app.whenReady().then(async () => {
     const processed_champions_skins = await processChampionSkins(skins)
     console.log(processed_champions_skins)
     console.log(processed_champions_skins['Naafiri'])
-    console.log(processed_champions_skins['Naafiri'][2]['chromas'])
+    console.log(processed_champions_skins['Naafiri'][2]['chromas'][0]['downloadUrl'])
+
+    const fantomeFilePath = await downloadFile(
+      processed_champions_skins['Zed'][2]['chromas'][0]['downloadUrl']
+    )
+    console.log(fantomeFilePath)
+    const patchOptions = {
+      fantomeFilePath: fantomeFilePath,
+      leagueOfLegendsPath: 'C:\\Riot Games\\League of Legends\\Game',
+      cslolPath: './resources/cslol/',
+      skipConflict: true,
+      debugPatcher: false
+    }
+    patchClientWithMod(patchOptions)
     return processed_champions_skins
   })
 

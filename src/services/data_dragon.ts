@@ -1,7 +1,9 @@
 import axios from 'axios'
 import fs from 'fs'
 import path from 'path'
-
+/*
+  TODO: THIS METHOD NEEDS TO BE REWORKED TO A MORE OPTIMIZED WAY.
+*/
 interface SkinInfo {
   name: string
   downloadUrl: string
@@ -46,7 +48,17 @@ interface ProcessedChampionSkins {
 
 const resourcesDir = './resources/data_dragon'
 
+// Função para garantir que o diretório existe
+function ensureDirectoryExistence(dir: string): void {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
+    console.log(`Diretório criado: ${dir}`)
+  }
+}
+
 async function downloadJsonIfNotExists(url: string, filePath: string): Promise<void> {
+  ensureDirectoryExistence(path.dirname(filePath)) // Garante que o diretório existe
+
   if (!fs.existsSync(filePath)) {
     console.log(`Arquivo não encontrado em ${filePath}. Baixando...`)
     const response = await axios.get(url)
