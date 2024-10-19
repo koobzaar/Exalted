@@ -1,5 +1,5 @@
 header {
-  -webkit-app-region: drag; /* Torna o cabeçalho arrastável */
+  -webkit-app-region: drag;
   height: 53px;
   width: 100%;
   background-color: var(--color-background);
@@ -7,7 +7,6 @@ header {
   align-items: center;
   justify-content: space-between;
 }
-
 header .title {
   color: var(--text);
   width: 80%;
@@ -17,29 +16,26 @@ header .title {
   justify-content: center;
   margin-left: 66px;
 }
-
 header h1 {
   margin: 0;
   font-size: 10px;
   font-family: 'Poppins', sans-serif;
   font-weight: 400;
   font-style: normal;
-  color: var(--text); /* Certifique-se de que a cor do texto tenha bom contraste */
-  letter-spacing: 0.5px; /* Aumenta o espaçamento entre letras */
-  line-height: 1.5; /* Aumenta a altura da linha */
+  color: var(--text);
+  letter-spacing: 0.5px;
+  line-height: 1.5;
 }
-
 header p {
   margin: 0;
   font-size: 7px;
   font-family: 'Poppins', sans-serif;
   font-weight: 400;
   font-style: normal;
-  color: var(--text); /* Certifique-se de que a cor do texto tenha bom contraste */
-  letter-spacing: 0.5px; /* Aumenta o espaçamento entre letras */
-  line-height: 1.5; /* Aumenta a altura da linha */
+  color: var(--text);
+  letter-spacing: 0.5px;
+  line-height: 1.5;
 }
-
 header .close-minimize {
   width: 20%;
   height: 100%;
@@ -48,31 +44,25 @@ header .close-minimize {
   justify-content: end;
   margin-right: 25px;
 }
-
 header .close-minimize button {
   width: 12px;
   height: 12px;
   border-radius: 100%;
   border: none;
-  -webkit-app-region: no-drag; /* Garante que os botões sejam interativos */
-  cursor: pointer; /* Adiciona cursor de ponteiro para indicar interatividade */
-  transition: background-color 0.3s ease; /* Adiciona transição suave */
+  -webkit-app-region: no-drag;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
-
 header .close-minimize .close {
   background-color: var(--primary);
   margin-left: 5px;
 }
-
 header .close-minimize .minimize {
   background-color: var(--secundary);
 }
-
 header .close-minimize .close:hover {
-  /* remove the contrast a little from the variable */
-  background-color: var(--primary-lighter); /* Exemplo de cor mais clara */
+  background-color: var(--primary-lighter);
 }
-
 header .close-minimize .minimize:hover {
-  background-color: var(--primary-lighter); /* Exemplo de cor mais clara */
+  background-color: var(--primary-lighter);
 }
