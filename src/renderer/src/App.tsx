@@ -30,7 +30,21 @@ const App = (): JSX.Element => {
   return (
     <>
       <div id="exalted">
-        <header></header>
+        <header>
+          <div className="title">
+            <h1>Exalted</h1>
+            <p>A League of Legends skin changer</p>
+          </div>
+          <div className="close-minimize">
+            <button className="minimize"></button>
+            <button
+              className="close"
+              onClick={() => {
+                console.log('close')
+              }}
+            ></button>
+          </div>
+        </header>
         <main>
           <aside className="champions-list"></aside>
           <section className="skins-list"></section>
