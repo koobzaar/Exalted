@@ -1,0 +1,21 @@
+#exalted {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background);
+}
+header {
+  -webkit-app-region: drag;
+  height: 53px;
+  width: 100%;
+  background-color: red;
+}
+main aside {
+  width: 157px;
+  height: 413px;
+  background-color: blue;
+}
+footer {
+  width: 100%;
+  background-color: green;
+  height: 56px;
+}

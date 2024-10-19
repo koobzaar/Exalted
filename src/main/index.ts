@@ -1,19 +1,21 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png'
 import getLoLSkins from '../services/github'
 import processChampionSkins from '../services/data_dragon'
-import patchClientWithMod from '../services/mod_injector'
-import downloadFile from '../services/downloader'
+
+let SKINS_CATALOG: any = null
 
 async function createWindow(): Promise<void> {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 723,
+    height: 522,
+    frame: false,
     show: false,
     autoHideMenuBar: true,
+    resizable: false,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -21,6 +23,7 @@ async function createWindow(): Promise<void> {
     }
   })
 
+  Menu.setApplicationMenu(null)
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
@@ -53,27 +56,13 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.handle('get-lol-catalog', async () => {
-    const skins = await getLoLSkins()
-    const processed_champions_skins = await processChampionSkins(skins)
-    console.log(processed_champions_skins)
-    console.log(processed_champions_skins['Naafiri'])
-    console.log(processed_champions_skins['Naafiri'][2]['chromas'][0]['downloadUrl'])
+  // Initialize SKINS_CATALOG
+  const skins = await getLoLSkins()
+  SKINS_CATALOG = await processChampionSkins(skins)
 
-    const fantomeFilePath = await downloadFile(
-      processed_champions_skins['Zed'][2]['chromas'][0]['downloadUrl']
-    )
-    console.log(fantomeFilePath)
-    const patchOptions = {
-      fantomeFilePath: fantomeFilePath,
-      leagueOfLegendsPath: 'C:\\Riot Games\\League of Legends\\Game',
-      cslolPath: './resources/cslol/',
-      skipConflict: true,
-      debugPatcher: false
-    }
-    patchClientWithMod(patchOptions)
-    return processed_champions_skins
+  // IPC handler to return SKINS_CATALOG
+  ipcMain.handle('get-lol-catalog', async () => {
+    return SKINS_CATALOG
   })
 
   await createWindow()
