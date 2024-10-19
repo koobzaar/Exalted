@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: sulfur
+productName: Exalted
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: sulfur
+  executableName: Exalted
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
