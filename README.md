@@ -30,8 +30,8 @@ https://github.com/user-attachments/assets/8d3ebb78-ff2e-414b-895a-8ffaf38ceb90
 6. **Choose Skin/Chroma**: Select the skin and chroma (if available) that you wish to inject.
 7. **Inject Skin**: Hit the "Play" button to apply the skin to your client.
 8. **Select the default skin**: Make sure to select the default skin for your champion. The Exalted doesn't overlapse any skin.
-9. **Launch the Game**: Once the injection is complete, launch League of Legends, and your selected skin will be visible to you during your gameplay.
-
+9. **Launch the Game**: Once the injection is complete, wait for the League match to start.
+    
 ### Installation
 
 1. **Download the Latest Release**: Head over to our [GitHub releases page](https://github.com/koobzaar/Exalted/releases) to download the latest version of Exalted.
