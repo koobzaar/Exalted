@@ -167,7 +167,9 @@ const App = (): JSX.Element => {
             <div className="logo-title-wrapper">
               <img id="birds-logo" src={birds} alt="Birds" />
               <div>
-                <h1>Exalted</h1>
+                <h1>
+                  Exalted <span style={{ color: '#999' }}>by Kobzar</span>
+                </h1>
                 <p>A League of Legends skin changer</p>
               </div>
             </div>
