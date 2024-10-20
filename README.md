@@ -20,7 +20,14 @@ https://github.com/user-attachments/assets/8d3ebb78-ff2e-414b-895a-8ffaf38ceb90
 - **Simple Interface**: Built using Electron, Exalted offers a straightforward and clean user experience for seamless skin injection.
 - **Efficient Caching System**: Skin catalog data is cached for faster access after the first load.
 
-### Step-by-Step Guide
+### Installation
+
+1. **Download the Latest Release**: Head over to our [GitHub releases page](https://github.com/koobzaar/Exalted/releases) to download the latest version of Exalted.
+2. **Extract the file**: Exctract using 7Zip or NanaZip.
+3. **Run the installer**: Follow the installation process as prompted by the installer.
+4. **Launch and start**: Open Exalted, and you’re ready to start browsing and injecting skins!
+   
+### Usage
 
 1. **Download and extract**: Download from the releases, extract and run.
 2. **Launch Exalted**: Start by launching the Exalted application on your computer.
@@ -32,12 +39,7 @@ https://github.com/user-attachments/assets/8d3ebb78-ff2e-414b-895a-8ffaf38ceb90
 8. **Select the default skin**: Make sure to select the default skin for your champion. The Exalted doesn't overlapse any skin.
 9. **Launch the Game**: Once the injection is complete, wait for the League match to start.
     
-### Installation
 
-1. **Download the Latest Release**: Head over to our [GitHub releases page](https://github.com/koobzaar/Exalted/releases) to download the latest version of Exalted.
-2. **Exctract the file**: Exctract using 7Zip or NanaZip.
-3. **Run the Installer**: Follow the installation process as prompted by the installer.
-4. **Launch and Start**: Open Exalted, and you’re ready to start browsing and injecting skins!
 ### How It Works
 
 Exalted follows a clear and organized process to ensure that the skin injection is smooth and easy for users. Below is a flowchart that represents the key steps:
