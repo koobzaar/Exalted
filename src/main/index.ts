@@ -10,12 +10,68 @@ import patchClientWithMod from '../services/mod_injector'
 import { getCachedCatalog, updateCache } from '../services/cache_manager'
 import fs from 'fs'
 import { ChildProcess } from 'child_process'
+import https from 'https'
 
 let SKINS_CATALOG: unknown = null
 let leagueOfLegendsPath: string | null = null
 const LOL_PATH_FILE = path.resolve(__dirname, '../../resources/cache/lolpath.txt')
+const CSLOL_FOLDER = path.resolve(__dirname, '../../resources/cslol')
 
 let modToolsProcess: ChildProcess | null = null
+
+const REQUIRED_FILES = {
+  'mod-tools.exe':
+    'https://raw.githubusercontent.com/koobzaar/exalted/main/resources/cslol/mod-tools.exe',
+  'cslol-dll.dll':
+    'https://raw.githubusercontent.com/koobzaar/exalted/main/resources/cslol/cslol-dll.dll'
+}
+
+async function downloadRequiredFile(filename: string, url: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const filePath = path.join(CSLOL_FOLDER, filename)
+    const fileStream = fs.createWriteStream(filePath)
+
+    https
+      .get(url, (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to download ${filename}: ${response.statusCode}`))
+          return
+        }
+
+        response.pipe(fileStream)
+        fileStream.on('finish', () => {
+          fileStream.close()
+          resolve()
+        })
+      })
+      .on('error', (err) => {
+        fs.unlink(filePath, () => {}) // Clean up failed download
+        reject(err)
+      })
+  })
+}
+
+async function verifyAndDownloadRequiredFiles(): Promise<void> {
+  // Create CSLOL_FOLDER if it doesn't exist
+  if (!fs.existsSync(CSLOL_FOLDER)) {
+    fs.mkdirSync(CSLOL_FOLDER, { recursive: true })
+  }
+
+  for (const [filename, url] of Object.entries(REQUIRED_FILES)) {
+    const filePath = path.join(CSLOL_FOLDER, filename)
+    console.log(filePath)
+    if (!fs.existsSync(filePath)) {
+      console.log(`Downloading missing file: ${filename}`)
+      try {
+        await downloadRequiredFile(filename, url)
+        console.log(`Successfully downloaded ${filename}`)
+      } catch (error) {
+        console.error(`Failed to download ${filename}:`, error)
+        throw error
+      }
+    }
+  }
+}
 
 function getStoredLoLPath(): string | null {
   try {
@@ -70,6 +126,7 @@ async function ensureLoLPath(): Promise<void> {
     }
   }
 }
+
 async function createWindow(): Promise<void> {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -96,8 +153,6 @@ async function createWindow(): Promise<void> {
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -105,29 +160,23 @@ async function createWindow(): Promise<void> {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-  // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
   try {
+    // Verify and download required files before proceeding
+    await verifyAndDownloadRequiredFiles()
     await ensureLoLPath()
   } catch (error) {
-    console.error('Failed to get League of Legends path:', error)
+    console.error('Initialization failed:', error)
     app.quit()
     return
   }
 
-  // Initialize SKINS_CATALOG
   SKINS_CATALOG = await getCachedCatalog()
 
   if (!SKINS_CATALOG) {
@@ -137,7 +186,6 @@ app.whenReady().then(async () => {
     await updateCache(SKINS_CATALOG)
   }
 
-  // IPC handler to return SKINS_CATALOG
   ipcMain.handle('get-lol-catalog', async () => {
     return SKINS_CATALOG
   })
@@ -182,19 +230,12 @@ app.whenReady().then(async () => {
   await createWindow()
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.

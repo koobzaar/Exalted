@@ -243,7 +243,14 @@ const App = (): JSX.Element => {
           </AnimatePresence>
         </main>
         <footer>
-          <div className="info"></div>
+          <div className="info">
+            <p>
+              Made with ❤️ by{' '}
+              <a href="https://beacons.ai/kobzar" target="_blank" rel="noreferrer">
+                Bruno Trigueiro
+              </a>
+            </p>
+          </div>
           <div className="inject-button">
             {injectionStatus === 'idle' && (
               <button id="inject" onClick={handleInjectClick}>
