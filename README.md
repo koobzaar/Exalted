@@ -53,7 +53,7 @@ graph TD
     D --> E
     E --> F[Load Skin Catalog]
     F -->|Cache Exists| G[Check Cache Validity]
-    F -->|No Cache| H[Fetch New Data]
+    F -->|No Cache| H[Fetch New Data from LoL-Skins-Developer repository  and store to cache]
     G -->|Valid| I[Use Cached Catalog]
     G -->|Invalid| H
     H --> J[Process Champion Skins]
