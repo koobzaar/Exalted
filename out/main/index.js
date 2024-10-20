@@ -225,15 +225,30 @@ async function patchClientWithMod(options) {
     `--mods:${modName}`,
     skipConflict ? "--ignoreConflict" : ""
   ]);
-  await execPromise(modToolsPath, [
-    "runoverlay",
-    profilePath,
-    profileConfigPath,
-    `--game:${leagueOfLegendsPath2}`,
-    `--opts:${debugPatcher ? "debugpatcher" : "none"}`
-  ]);
-  console.log("Patcher executed successfully");
-  return Promise.resolve();
+  return new Promise((resolve) => {
+    const runOverlayProcess = child_process.execFile(
+      modToolsPath,
+      [
+        "runoverlay",
+        profilePath,
+        profileConfigPath,
+        `--game:${leagueOfLegendsPath2}`,
+        `--opts:${debugPatcher ? "debugpatcher" : "none"}`
+      ],
+      (error) => {
+        if (error) {
+          console.error("Patcher execution failed:", error);
+          resolve({ success: false, process: null });
+        }
+      }
+    );
+    setTimeout(() => {
+      if (!runOverlayProcess.killed) {
+        console.log("Patcher executed successfully");
+        resolve({ success: true, process: runOverlayProcess });
+      }
+    }, 2e3);
+  });
 }
 function execPromise(command, args) {
   return new Promise((resolve, reject) => {
@@ -293,6 +308,7 @@ async function getLatestCommitSha() {
 let SKINS_CATALOG = null;
 let leagueOfLegendsPath = null;
 const LOL_PATH_FILE = path.resolve(__dirname, "../../resources/cache/lolpath.txt");
+let modToolsProcess = null;
 function getStoredLoLPath() {
   try {
     if (fs.existsSync(LOL_PATH_FILE)) {
@@ -405,8 +421,19 @@ electron.app.whenReady().then(async () => {
       skipConflict: true,
       debugPatcher: false
     };
-    await patchClientWithMod(patchOptions);
-    console.log("Skin injected");
+    const { success, process: process2 } = await patchClientWithMod(patchOptions);
+    if (success) {
+      modToolsProcess = process2;
+    }
+    return success;
+  });
+  electron.ipcMain.handle("stop-injection", async () => {
+    if (modToolsProcess) {
+      modToolsProcess.kill();
+      modToolsProcess = null;
+      return true;
+    }
+    return false;
   });
   await createWindow();
   electron.app.on("activate", function() {

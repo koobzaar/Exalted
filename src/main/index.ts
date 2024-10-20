@@ -9,10 +9,13 @@ import downloadFile from '../services/downloader'
 import patchClientWithMod from '../services/mod_injector'
 import { getCachedCatalog, updateCache } from '../services/cache_manager'
 import fs from 'fs'
+import { ChildProcess } from 'child_process'
 
 let SKINS_CATALOG: unknown = null
 let leagueOfLegendsPath: string | null = null
 const LOL_PATH_FILE = path.resolve(__dirname, '../../resources/cache/lolpath.txt')
+
+let modToolsProcess: ChildProcess | null = null
 
 function getStoredLoLPath(): string | null {
   try {
@@ -160,8 +163,20 @@ app.whenReady().then(async () => {
       skipConflict: true,
       debugPatcher: false
     }
-    await patchClientWithMod(patchOptions)
-    console.log('Skin injected')
+    const { success, process } = await patchClientWithMod(patchOptions)
+    if (success) {
+      modToolsProcess = process
+    }
+    return success
+  })
+
+  ipcMain.handle('stop-injection', async () => {
+    if (modToolsProcess) {
+      modToolsProcess.kill()
+      modToolsProcess = null
+      return true
+    }
+    return false
   })
 
   await createWindow()

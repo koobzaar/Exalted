@@ -224,7 +224,9 @@ footer .inject-button {
   height: 100%;
   background-color: inherit;
 }
-footer .inject-button #inject {
+footer .inject-button #inject,
+footer .inject-button #loading,
+footer .inject-button #stop {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -237,9 +239,28 @@ footer .inject-button #inject {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-footer .inject-button #inject:hover {
+
+footer .inject-button #inject:hover,
+footer .inject-button #loading:hover,
+footer .inject-button #stop:hover {
   background-color: var(--primary-lighter);
 }
-footer .inject-button #play-button {
+
+footer .inject-button #play-button,
+footer .inject-button #loading-icon,
+footer .inject-button #stop-button {
   width: 10px;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+footer .inject-button #loading-icon {
+  width: 10px;
+  animation: spin 1s linear infinite;
 }

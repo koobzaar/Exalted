@@ -7,11 +7,12 @@ Urgent:
 - [ ] Fix the issue that it takes a lot of time to open the program for the first time because of the active downloads of data dragon files
 - [x] Cache the catalog and the last commit in case of skin change
 - [ ] Fix the issue that .exe files are not unpacked on dist (maybe i need to download directly from cslol)
-- [ ] Make a alert to tell the user that the injection was successful
-- [ ] Make a animation for the "play" button (that will probably be changed)
+- [x] Make a alert to tell the user that the injection was successful
+- [x] Make a animation for the "play" button (that will probably be changed)
 - [x] Prompt the user for the lol installation folder on first run
+- [ ] Write a more beautiful alert
 
 Needs to be worked later:
 
-- [ ] Fix an issue that cslol modtools injection tool doesn't return if the injection is active (therefore there's no actually way to know if worked or not)
-- [ ] Make the first champion active on program loads (show Aatrox skins)
+- [x] Fix an issue that cslol modtools injection tool doesn't return if the injection is active (therefore there's no actually way to know if worked or not)
+- [x] Make the first champion active on program loads (show Aatrox skins)

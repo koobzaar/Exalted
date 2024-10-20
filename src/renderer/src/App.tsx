@@ -4,6 +4,9 @@ import Skin from './components/Skin/Skin'
 import './assets/App.css'
 import playButton from './assets/play-button-arrowhead.png'
 import birds from './assets/birds.png'
+import loading from './assets/loading.png'
+import stop from './assets/stop.png'
+import CustomAlert from './components/Alert/Alert'
 
 interface ProcessedSkin {
   skinName: string
@@ -38,6 +41,8 @@ const ipcHandle = async (): Promise<ProcessedChampion[]> => {
 
 const App = (): JSX.Element => {
   const [skins, setSkins] = useState<ProcessedChampion[]>([])
+  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [injectionStatus, setInjectionStatus] = useState<'idle' | 'loading' | 'injected'>('idle')
   const [selection, setSelection] = useState<Selection>({
     championName: null,
     skinId: null,
@@ -49,6 +54,16 @@ const App = (): JSX.Element => {
     ipcHandle()
       .then((skins) => {
         setSkins(skins)
+        if (skins.length > 0) {
+          const firstChampion = skins[0]
+          const firstSkin = firstChampion.skins[0]
+          setSelection({
+            championName: firstChampion.championName,
+            skinId: firstSkin.skinId,
+            chromaId: null
+          })
+          setSelectedSkinUrl(firstSkin.downloadUrl)
+        }
       })
       .catch((error) => {
         console.error('Erro ao obter o catálogo de skins:', error)
@@ -98,17 +113,45 @@ const App = (): JSX.Element => {
   }
   const handleInjectClick = (): void => {
     if (selectedSkinUrl) {
+      setInjectionStatus('loading')
       window.electron.ipcRenderer
         .invoke('inject-skin', selectedSkinUrl)
-        .then(() => {
-          console.log('Skin injected successfully')
+        .then((success) => {
+          if (success) {
+            setAlert({ type: 'success', message: 'Skin injected successfully!' })
+            setInjectionStatus('injected')
+          } else {
+            setAlert({ type: 'error', message: 'Failed to inject skin. Please try again.' })
+            setInjectionStatus('idle')
+          }
+          setTimeout(() => setAlert(null), 5000) // Hide alert after 5 seconds
         })
         .catch((error) => {
-          console.error('Erro ao injetar a skin:', error)
+          console.error('Error injecting skin:', error)
+          setAlert({ type: 'error', message: 'An error occurred while injecting the skin.' })
+          setInjectionStatus('idle')
+          setTimeout(() => setAlert(null), 5000)
         })
     } else {
-      console.error('Nenhuma URL de skin selecionada')
+      console.error('No skin URL selected')
+      setAlert({ type: 'error', message: 'Please select a skin before injecting.' })
+      setTimeout(() => setAlert(null), 5000)
     }
+  }
+  const handleStopClick = (): void => {
+    window.electron.ipcRenderer
+      .invoke('stop-injection')
+      .then(() => {
+        setInjectionStatus('idle')
+        setAlert({ type: 'success', message: 'Injection stopped successfully.' })
+      })
+      .catch((error) => {
+        console.error('Error stopping injection:', error)
+        setAlert({ type: 'error', message: 'Failed to stop injection. Please try again.' })
+      })
+      .finally(() => {
+        setTimeout(() => setAlert(null), 5000)
+      })
   }
   const closeApp = (): void => {
     window.electron.ipcRenderer.send('close-app')
@@ -200,14 +243,30 @@ const App = (): JSX.Element => {
         <footer>
           <div className="info"></div>
           <div className="inject-button">
-            <button id="inject" onClick={handleInjectClick}>
-              <img id="play-button" src={playButton} alt="Play button" />
-            </button>
+            {injectionStatus === 'idle' && (
+              <button id="inject" onClick={handleInjectClick}>
+                <img id="play-button" src={playButton} alt="Play button" />
+              </button>
+            )}
+            {injectionStatus === 'loading' && (
+              <button id="loading" disabled>
+                <img id="loading-icon" src={loading} alt="Loading" />
+              </button>
+            )}
+            {injectionStatus === 'injected' && (
+              <button id="stop" onClick={handleStopClick}>
+                <img id="stop-button" src={stop} alt="Stop button" />
+              </button>
+            )}
           </div>
         </footer>
+        <AnimatePresence>
+          {alert && (
+            <CustomAlert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />
+          )}
+        </AnimatePresence>
       </div>
     </>
   )
 }
-
 export default App

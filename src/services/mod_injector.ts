@@ -1,7 +1,6 @@
-import { execFile } from 'child_process'
+import { execFile, ChildProcess } from 'child_process'
 import * as path from 'path'
 import * as fs from 'fs/promises'
-
 interface PatcherOptions {
   fantomeFilePath: string
   leagueOfLegendsPath: string
@@ -10,7 +9,9 @@ interface PatcherOptions {
   debugPatcher?: boolean
 }
 
-async function patchClientWithMod(options: PatcherOptions): Promise<void> {
+async function patchClientWithMod(
+  options: PatcherOptions
+): Promise<{ success: boolean; process: ChildProcess | null }> {
   const {
     fantomeFilePath,
     leagueOfLegendsPath,
@@ -65,17 +66,33 @@ async function patchClientWithMod(options: PatcherOptions): Promise<void> {
   ])
 
   // 4. Run the patcher
-  await execPromise(modToolsPath, [
-    'runoverlay',
-    profilePath,
-    profileConfigPath,
-    `--game:${leagueOfLegendsPath}`,
-    `--opts:${debugPatcher ? 'debugpatcher' : 'none'}`
-  ])
-  console.log('Patcher executed successfully')
-  return Promise.resolve()
-}
+  return new Promise<{ success: boolean; process: ChildProcess | null }>((resolve) => {
+    const runOverlayProcess: ChildProcess = execFile(
+      modToolsPath,
+      [
+        'runoverlay',
+        profilePath,
+        profileConfigPath,
+        `--game:${leagueOfLegendsPath}`,
+        `--opts:${debugPatcher ? 'debugpatcher' : 'none'}`
+      ],
+      (error) => {
+        if (error) {
+          console.error('Patcher execution failed:', error)
+          resolve({ success: false, process: null })
+        }
+      }
+    )
 
+    // If the process is still running after a short delay, consider it successful
+    setTimeout(() => {
+      if (!runOverlayProcess.killed) {
+        console.log('Patcher executed successfully')
+        resolve({ success: true, process: runOverlayProcess })
+      }
+    }, 2000) // 2 seconds delay
+  })
+}
 function execPromise(command: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     execFile(command, args, (error) => {
