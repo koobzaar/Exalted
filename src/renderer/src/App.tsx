@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Skin from './components/Skin/Skin'
 import './assets/App.css'
+import playButton from './assets/play-button-arrowhead.png'
 
 interface ProcessedSkin {
   skinName: string
   skinId: number
   downloadUrl: string
-  loadingScreenUrl: [string, string]
+  loadingScreenUrl: string
   chromas?: {
     chromaId: number
     chromaColors: string[]
@@ -23,6 +24,12 @@ interface ProcessedChampion {
   skins: ProcessedSkin[]
 }
 
+interface Selection {
+  championName: string | null
+  skinId: number | null
+  chromaId: number | null
+}
+
 const ipcHandle = async (): Promise<ProcessedChampion[]> => {
   const skins = await window.electron.ipcRenderer.invoke('get-lol-catalog')
   return skins as ProcessedChampion[]
@@ -30,7 +37,11 @@ const ipcHandle = async (): Promise<ProcessedChampion[]> => {
 
 const App = (): JSX.Element => {
   const [skins, setSkins] = useState<ProcessedChampion[]>([])
-  const [selectedChampion, setSelectedChampion] = useState<string | null>(null)
+  const [selection, setSelection] = useState<Selection>({
+    championName: null,
+    skinId: null,
+    chromaId: null
+  })
 
   useEffect(() => {
     ipcHandle()
@@ -43,9 +54,45 @@ const App = (): JSX.Element => {
   }, [])
 
   const handleChampionClick = (championName: string) => {
-    setSelectedChampion(championName)
+    setSelection((prev) => ({
+      ...prev,
+      championName,
+      skinId: null,
+      chromaId: null
+    }))
   }
-  console.log(skins)
+
+  const handleSkinClick = (skinId: number) => {
+    setSelection((prev) => ({
+      ...prev,
+      skinId,
+      chromaId: null
+    }))
+
+    // Find and log the download URL
+    const champion = skins.find((c) => c.championName === selection.championName)
+    const skin = champion?.skins.find((s) => s.skinId === skinId)
+    if (skin) {
+      console.log('Skin download URL:', skin.downloadUrl)
+    }
+  }
+
+  const handleChromaClick = (skinId: number, chromaId: number) => {
+    setSelection((prev) => ({
+      ...prev,
+      skinId,
+      chromaId
+    }))
+
+    // Find and log the download URL
+    const champion = skins.find((c) => c.championName === selection.championName)
+    const skin = champion?.skins.find((s) => s.skinId === skinId)
+    const chroma = skin?.chromas?.find((c) => c.chromaId === chromaId)
+    if (chroma) {
+      console.log('Chroma download URL:', chroma.downloadUrl)
+    }
+  }
+
   return (
     <>
       <div id="exalted">
@@ -56,12 +103,7 @@ const App = (): JSX.Element => {
           </div>
           <div className="close-minimize">
             <button className="minimize"></button>
-            <button
-              className="close"
-              onClick={() => {
-                console.log('close')
-              }}
-            ></button>
+            <button className="close" onClick={() => console.log('close')}></button>
           </div>
         </header>
         <main>
@@ -70,7 +112,7 @@ const App = (): JSX.Element => {
               {skins.map((champion) => (
                 <motion.li
                   key={champion.championName}
-                  className={`champion-option ${selectedChampion === champion.championName ? 'selected' : ''}`}
+                  className={`champion-option ${selection.championName === champion.championName ? 'selected' : ''}`}
                   onClick={() => handleChampionClick(champion.championName)}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -81,23 +123,23 @@ const App = (): JSX.Element => {
                       alt={champion.championName}
                     />
                   </div>
-                  <p>{champion.championName}</p>
+                  <p id="champion-name">{champion.championName}</p>
                 </motion.li>
               ))}
             </ul>
           </aside>
           <AnimatePresence mode="wait">
-            {selectedChampion && (
+            {selection.championName && (
               <motion.section
                 className="skins-list"
-                key={selectedChampion}
+                key={selection.championName}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
                 {skins
-                  .find((champion) => champion.championName === selectedChampion)
+                  .find((champion) => champion.championName === selection.championName)
                   ?.skins.map((skin) => (
                     <motion.div
                       key={skin.skinId}
@@ -107,9 +149,13 @@ const App = (): JSX.Element => {
                       style={{ display: 'contents' }}
                     >
                       <Skin
-                        backgroundImage={skin.loadingScreenUrl[0]}
-                        backgroundImageAlt={skin.loadingScreenUrl[1]}
+                        backgroundImage={skin.loadingScreenUrl}
                         chromas={skin.chromas || []}
+                        skinId={skin.skinId}
+                        isSelected={selection.skinId === skin.skinId}
+                        selectedChromaId={selection.chromaId}
+                        onSkinClick={handleSkinClick}
+                        onChromaClick={handleChromaClick}
                       />
                     </motion.div>
                   ))}
@@ -117,7 +163,14 @@ const App = (): JSX.Element => {
             )}
           </AnimatePresence>
         </main>
-        <footer></footer>
+        <footer>
+          <div className="info"></div>
+          <div className="inject-button">
+            <button id="inject" onClick={() => console.log('inject')}>
+              <img id="play-button" src={playButton} alt="Play button" />
+            </button>
+          </div>
+        </footer>
       </div>
     </>
   )

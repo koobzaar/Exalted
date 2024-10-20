@@ -1,25 +1,56 @@
 .skin-holder {
   width: 129.33px;
-  background-color: red;
   height: 242.07px;
   display: flex;
   align-items: end;
   padding-bottom: 12px;
   justify-content: center;
   border-radius: 7px;
+  cursor: pointer;
+  transition: background-position 0.3s ease;
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #2a2a2a;
+}
+
+.skeleton::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%) skewX(-45deg);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+  content: '';
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%) skewX(-45deg);
+  }
 }
 
 .chromas {
   height: auto;
-  background-color: #1e1e1e;
+  background-color: rgba(30, 30, 30, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.3px; /* Ajuste o espaçamento entre os chromas */
-  flex-wrap: wrap; /* Permite a quebra de linha */
+  gap: 0.3px;
+  flex-wrap: wrap;
   padding: 3px;
   margin-left: 3px;
   margin-right: 3px;
+  border-radius: 10px;
 }
 
 .chroma-color {
@@ -28,28 +59,21 @@
   min-height: 7px;
   height: 7px;
   border-radius: 100%;
-  background-color: red;
   margin: 3px 3px;
+  cursor: pointer;
 }
 
-/* Classe para reduzir o border-radius */
-.chromas.small-radius {
-  border-radius: 10px; /* Ajuste conforme necessário */
-}
-
-/* Regra de mídia para quebrar a linha quando houver mais de 6 elementos */
 @media (max-width: 200px) {
   .chromas {
-    height: auto; /* Permite que a altura se ajuste automaticamente */
+    height: auto;
   }
 }
 
-/* Tornar a altura responsiva */
 @media (min-height: 300px) {
   .chromas {
     border-radius: 10px;
     width: auto;
-    height: auto; /* Ajuste conforme necessário */
+    height: auto;
     padding-top: 5px;
     padding-bottom: 5px;
   }

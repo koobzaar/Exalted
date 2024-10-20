@@ -49,19 +49,8 @@ async function downloadJsonIfNotExists(url, filePath) {
   }
 }
 function getLoadingScreenUrl(championAlias, skinId) {
-  championAlias = championAlias.toLowerCase();
-  if (skinId === 0) {
-    return [
-      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/base/${championAlias}loadscreen_0.jpg`,
-      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/base/${championAlias}loadscreen.jpg`
-    ];
-  } else {
-    const paddedSkinId = skinId < 10 ? `0${skinId}` : skinId.toString();
-    return [
-      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/skin${paddedSkinId}/${championAlias}loadscreen_${skinId}.jpg`,
-      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/skin${paddedSkinId}/${championAlias}loadscreen_${skinId}.skins_${championAlias}_skin${skinId}.jpg`
-    ];
-  }
+  const formattedSkinId = skinId.toString();
+  return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${championAlias}_${formattedSkinId}.jpg`;
 }
 async function processChampionSkins(championSkins) {
   const processedSkinsArray = [];
@@ -88,12 +77,11 @@ async function processChampionSkins(championSkins) {
         return skinIdFromDataDragon === skinId;
       });
       if (dataDragonSkin) {
-        const screenUrls = getLoadingScreenUrl(championAlias, skinId);
         const processedSkin = {
           skinName: dataDragonSkin.name,
           skinId,
           downloadUrl: skin.downloadUrl,
-          loadingScreenUrl: [screenUrls[0], screenUrls[1]]
+          loadingScreenUrl: getLoadingScreenUrl(championAlias, skinId)
         };
         console.log(`Skin encontrada: ${dataDragonSkin.name}`);
         if (dataDragonSkin.chromas && dataDragonSkin.chromas.length > 0) {

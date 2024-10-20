@@ -34,7 +34,7 @@ interface ProcessedSkin {
   skinName: string
   skinId: number
   downloadUrl: string
-  loadingScreenUrl: [string, string]
+  loadingScreenUrl: string
   chromas?: {
     chromaId: number
     chromaColors: string[]
@@ -72,20 +72,10 @@ async function downloadJsonIfNotExists(url: string, filePath: string): Promise<v
   }
 }
 
-function getLoadingScreenUrl(championAlias: string, skinId: number): string[] {
-  championAlias = championAlias.toLowerCase()
-  if (skinId === 0) {
-    return [
-      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/base/${championAlias}loadscreen_0.jpg`,
-      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/base/${championAlias}loadscreen.jpg`
-    ]
-  } else {
-    const paddedSkinId = skinId < 10 ? `0${skinId}` : skinId.toString()
-    return [
-      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/skin${paddedSkinId}/${championAlias}loadscreen_${skinId}.jpg`,
-      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/skin${paddedSkinId}/${championAlias}loadscreen_${skinId}.skins_${championAlias}_skin${skinId}.jpg`
-    ]
-  }
+function getLoadingScreenUrl(championAlias: string, skinId: number): string {
+  // Convert skinId to remove leading zero if less than 10
+  const formattedSkinId = skinId.toString()
+  return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${championAlias}_${formattedSkinId}.jpg`
 }
 
 async function processChampionSkins(championSkins: ChampionSkins): Promise<ProcessedChampion[]> {
@@ -110,7 +100,6 @@ async function processChampionSkins(championSkins: ChampionSkins): Promise<Proce
       const skinId = parseInt(skin.name.replace('.fantome', ''))
       console.log(`Processando skin com ID: ${skinId}`)
 
-      // Modified skin matching logic
       const dataDragonSkin = championData.skins.find((s: DataDragonSkin) => {
         const dataDragonSkinIdStr = s.id.toString()
         const championIdLength = championId.toString().length
@@ -120,12 +109,11 @@ async function processChampionSkins(championSkins: ChampionSkins): Promise<Proce
       })
 
       if (dataDragonSkin) {
-        const screenUrls = getLoadingScreenUrl(championAlias, skinId)
         const processedSkin: ProcessedSkin = {
           skinName: dataDragonSkin.name,
           skinId: skinId,
           downloadUrl: skin.downloadUrl,
-          loadingScreenUrl: [screenUrls[0], screenUrls[1]]
+          loadingScreenUrl: getLoadingScreenUrl(championAlias, skinId)
         }
         console.log(`Skin encontrada: ${dataDragonSkin.name}`)
 
@@ -165,6 +153,7 @@ async function processChampionSkins(championSkins: ChampionSkins): Promise<Proce
   console.log('Processamento de skins dos campeões concluído')
   return processedSkinsArray
 }
+
 async function getChampionData(championId: number): Promise<ChampionData | null> {
   try {
     console.log(`Buscando dados do campeão para o ID: ${championId}`)
