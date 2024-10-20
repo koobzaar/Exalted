@@ -21,14 +21,15 @@ The creator of this repository believes that with the implementation of predator
 
 ### Step-by-Step Guide
 
-1. **Launch Exalted**: Start by launching the Exalted application on your computer.
-2. **Ensure League of Legends Path**: The program will prompt you to confirm the installation path of League of Legends. It's probably on `C:\Riot Games\League of Legends\Game`
-3. **Load Skin Catalog**: Exalted will either load the skins from a cached catalog or fetch the latest skin data from online resources.
-4. **Browse Skins**: Use the user-friendly interface to browse through the skins available for each champion.
-5. **Choose Skin/Chroma**: Select the skin and chroma (if available) that you wish to inject.
-6. **Inject Skin**: Hit the "Play" button to apply the skin to your client.
-7. **Select the default skin**: Make sure to select the default skin for your champion. The Exalted doesn't overlapse any skin.
-8. **Launch the Game**: Once the injection is complete, launch League of Legends, and your selected skin will be visible to you during your gameplay.
+1. **Download and extract**: Download from the releases, extract and run.
+2. **Launch Exalted**: Start by launching the Exalted application on your computer.
+3. **Ensure League of Legends Path**: The program will prompt you to confirm the installation path of League of Legends. It's probably on `C:\Riot Games\League of Legends\Game`
+4. **Load Skin Catalog**: Exalted will either load the skins from a cached catalog or fetch the latest skin data from online resources.
+5. **Browse Skins**: Use the user-friendly interface to browse through the skins available for each champion.
+6. **Choose Skin/Chroma**: Select the skin and chroma (if available) that you wish to inject.
+7. **Inject Skin**: Hit the "Play" button to apply the skin to your client.
+8. **Select the default skin**: Make sure to select the default skin for your champion. The Exalted doesn't overlapse any skin.
+9. **Launch the Game**: Once the injection is complete, launch League of Legends, and your selected skin will be visible to you during your gameplay.
 
 ### Installation
 
