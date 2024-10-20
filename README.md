@@ -11,6 +11,9 @@ Using custom skins does not confer any competitive advantage, as they are only v
 The creator of this repository believes that with the implementation of predatory practices in skin sales — exemplified by exclusive skins like the Faker skin, which cost as much as three months' wages in some regions — Riot has restricted access to certain content for a significant portion of its player base. 
 
 > We hold that gaming culture should be inclusive and accessible, not just a privilege for those who can afford it.
+
+https://github.com/user-attachments/assets/8d3ebb78-ff2e-414b-895a-8ffaf38ceb90
+
 ## Key Features
 
 - **Browse and Select Skins**: A complete catalog of available skins fetched from lol-skins-developer.
