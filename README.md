@@ -93,7 +93,7 @@ Contributions to Exalted are welcomed! Whether it’s by submitting new skins, i
 2. **Create a new branch** for your feature or bugfix.
 3. **Submit a pull request** with a detailed description of your changes.
 
-For detailed instructions, check out our [CONTRIBUTING.md](CONTRIBUTING.md) file.
+If you want to add new skins or fix some bug, checkout the database for Exalted: https://github.com/koobzaar/lol-skins-developer
 
 ### Legal Disclaimer
 
