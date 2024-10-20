@@ -51,10 +51,16 @@ async function downloadJsonIfNotExists(url, filePath) {
 function getLoadingScreenUrl(championAlias, skinId) {
   championAlias = championAlias.toLowerCase();
   if (skinId === 0) {
-    return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/base/${championAlias}loadscreen.jpg`;
+    return [
+      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/base/${championAlias}loadscreen_0.jpg`,
+      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/base/${championAlias}loadscreen.jpg`
+    ];
   } else {
     const paddedSkinId = skinId < 10 ? `0${skinId}` : skinId.toString();
-    return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/skin${paddedSkinId}/${championAlias}loadscreen_${skinId}.jpg`;
+    return [
+      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/skin${paddedSkinId}/${championAlias}loadscreen_${skinId}.jpg`,
+      `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/skin${paddedSkinId}/${championAlias}loadscreen_${skinId}.skins_${championAlias}_skin${skinId}.jpg`
+    ];
   }
 }
 async function processChampionSkins(championSkins) {
@@ -75,23 +81,25 @@ async function processChampionSkins(championSkins) {
     for (const skin of skins) {
       const skinId = parseInt(skin.name.replace(".fantome", ""));
       console.log(`Processando skin com ID: ${skinId}`);
-      const dataDragonSkin = championData.skins.find(
-        (s) => s.id.toString().endsWith(skinId.toString())
-      );
+      const dataDragonSkin = championData.skins.find((s) => {
+        const dataDragonSkinIdStr = s.id.toString();
+        const championIdLength = championId.toString().length;
+        const skinIdFromDataDragon = parseInt(dataDragonSkinIdStr.slice(championIdLength));
+        return skinIdFromDataDragon === skinId;
+      });
       if (dataDragonSkin) {
+        const screenUrls = getLoadingScreenUrl(championAlias, skinId);
         const processedSkin = {
           skinName: dataDragonSkin.name,
           skinId,
           downloadUrl: skin.downloadUrl,
-          loadingScreenUrl: getLoadingScreenUrl(championAlias, skinId)
+          loadingScreenUrl: [screenUrls[0], screenUrls[1]]
         };
         console.log(`Skin encontrada: ${dataDragonSkin.name}`);
-        console.log(`Loading Screen URL: ${processedSkin.loadingScreenUrl}`);
         if (dataDragonSkin.chromas && dataDragonSkin.chromas.length > 0) {
           processedSkin.chromas = dataDragonSkin.chromas.map((chroma) => {
-            const parsedChromaID = parseInt(
-              chroma.id.toString().slice(championId.toString().length)
-            );
+            const championIdLength = championId.toString().length;
+            const parsedChromaID = parseInt(chroma.id.toString().slice(championIdLength));
             return {
               chromaId: parsedChromaID,
               chromaColors: chroma.colors,

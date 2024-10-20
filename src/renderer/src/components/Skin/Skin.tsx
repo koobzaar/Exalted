@@ -1,17 +1,30 @@
+import React, { useState } from 'react'
 import './Skin.css'
 import PropTypes from 'prop-types'
 
-function Skin(props): JSX.Element {
+function Skin(props) {
+  const [imageLoadError, setImageLoadError] = useState(false)
+
   const divStyle = {
-    backgroundImage: `url(${props.backgroundImage})`,
-    backgroundSize: '120%', // Ajusta a imagem para cobrir toda a div
-    backgroundPosition: 'center' // Centraliza a imagem
+    backgroundImage: `url(${imageLoadError ? props.backgroundImageAlt : props.backgroundImage})`,
+    backgroundSize: '120%',
+    backgroundPosition: 'center'
   }
-  console.log('chromas')
-  console.log(props.chromas)
+
+  const handleImageError = () => {
+    setImageLoadError(true)
+  }
+
   return (
     <>
       <div className="skin-holder" style={divStyle}>
+        {/* Hidden image element to trigger onError */}
+        <img
+          src={props.backgroundImage}
+          alt=""
+          style={{ display: 'none' }}
+          onError={handleImageError}
+        />
         {props.chromas && props.chromas.length > 0 && (
           <div className="chromas">
             {props.chromas.map((chroma) => (
@@ -38,7 +51,8 @@ Skin.propTypes = {
       downloadUrl: PropTypes.string.isRequired
     })
   ).isRequired,
-  backgroundImage: PropTypes.string.isRequired
+  backgroundImage: PropTypes.string.isRequired,
+  backgroundImageAlt: PropTypes.string.isRequired
 }
 
 export default Skin

@@ -7,7 +7,7 @@ interface ProcessedSkin {
   skinName: string
   skinId: number
   downloadUrl: string
-  loadingScreenUrl: string
+  loadingScreenUrl: [string, string]
   chromas?: {
     chromaId: number
     chromaColors: string[]
@@ -45,7 +45,7 @@ const App = (): JSX.Element => {
   const handleChampionClick = (championName: string) => {
     setSelectedChampion(championName)
   }
-
+  console.log(skins)
   return (
     <>
       <div id="exalted">
@@ -106,7 +106,11 @@ const App = (): JSX.Element => {
                       transition={{ duration: 0.2 }}
                       style={{ display: 'contents' }}
                     >
-                      <Skin backgroundImage={skin.loadingScreenUrl} chromas={skin.chromas || []} />
+                      <Skin
+                        backgroundImage={skin.loadingScreenUrl[0]}
+                        backgroundImageAlt={skin.loadingScreenUrl[1]}
+                        chromas={skin.chromas || []}
+                      />
                     </motion.div>
                   ))}
               </motion.section>
