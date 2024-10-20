@@ -4,7 +4,7 @@ https://www.figma.com/design/Q2oPsYyLvZ8EWPFPvbLanW/Untitled?node-id=0-1&t=Tebiw
 
 Urgent:
 
-- [ ] Fix the issue that it takes a lot of time to open the program for the first time because of the active downloads of data dragon files
+- [ ] Fix the issue that it takes a lot of time to open the program for the first time because of the active downloads of data dragon files - maybe download them all at the same time?
 - [x] Cache the catalog and the last commit in case of skin change
 - [ ] Fix the issue that .exe files are not unpacked on dist (maybe I need to download directly from cslol)
 - [x] Make a alert to tell the user that the injection was successful
