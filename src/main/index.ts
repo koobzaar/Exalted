@@ -1,5 +1,6 @@
-import { app, shell, BrowserWindow, ipcMain, Menu } from 'electron'
-import { join } from 'path'
+import { app, shell, BrowserWindow, ipcMain, Menu, dialog } from 'electron'
+import { join, dirname, basename } from 'path'
+import path from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png'
 import getLoLSkins from '../services/github'
@@ -7,8 +8,65 @@ import processChampionSkins from '../services/data_dragon'
 import downloadFile from '../services/downloader'
 import patchClientWithMod from '../services/mod_injector'
 import { getCachedCatalog, updateCache } from '../services/cache_manager'
-let SKINS_CATALOG: unknown = null
+import fs from 'fs'
 
+let SKINS_CATALOG: unknown = null
+let leagueOfLegendsPath: string | null = null
+const LOL_PATH_FILE = path.resolve(__dirname, '../../resources/cache/lolpath.txt')
+
+function getStoredLoLPath(): string | null {
+  try {
+    if (fs.existsSync(LOL_PATH_FILE)) {
+      return fs.readFileSync(LOL_PATH_FILE, 'utf-8')
+    }
+  } catch (error) {
+    console.error('Error reading LoL path file:', error)
+  }
+  return null
+}
+
+function storeLoLPath(path: string): void {
+  try {
+    fs.writeFileSync(LOL_PATH_FILE, path, 'utf-8')
+  } catch (error) {
+    console.error('Error writing LoL path file:', error)
+  }
+}
+
+async function promptForLoLPath(): Promise<string | null> {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [{ name: 'Executable', extensions: ['exe'] }],
+    title: 'Select League of Legends.exe'
+  })
+
+  if (!result.canceled && result.filePaths.length > 0) {
+    const selectedPath = result.filePaths[0]
+    const parentDir = dirname(selectedPath)
+    const grandParentDir = dirname(parentDir)
+
+    if (
+      basename(selectedPath).toLowerCase() === 'league of legends.exe' &&
+      basename(parentDir).toUpperCase() === 'GAME' &&
+      fs.existsSync(join(parentDir, 'DATA'))
+    ) {
+      return grandParentDir
+    }
+  }
+  return null
+}
+
+async function ensureLoLPath(): Promise<void> {
+  leagueOfLegendsPath = getStoredLoLPath()
+  if (!leagueOfLegendsPath) {
+    leagueOfLegendsPath = await promptForLoLPath()
+    if (leagueOfLegendsPath) {
+      storeLoLPath(leagueOfLegendsPath)
+    } else {
+      throw new Error('Valid League of Legends path not provided')
+    }
+  }
+}
 async function createWindow(): Promise<void> {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -58,6 +116,14 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  try {
+    await ensureLoLPath()
+  } catch (error) {
+    console.error('Failed to get League of Legends path:', error)
+    app.quit()
+    return
+  }
+
   // Initialize SKINS_CATALOG
   SKINS_CATALOG = await getCachedCatalog()
 
@@ -72,17 +138,24 @@ app.whenReady().then(async () => {
   ipcMain.handle('get-lol-catalog', async () => {
     return SKINS_CATALOG
   })
+
   ipcMain.on('close-app', () => {
     app.quit()
   })
+
   ipcMain.on('minimize-app', () => {
     BrowserWindow.getFocusedWindow()?.minimize()
   })
+
   ipcMain.handle('inject-skin', async (event, downloadURL: string) => {
+    if (!leagueOfLegendsPath) {
+      throw new Error('League of Legends path not set')
+    }
+
     const fantomeFilePath = await downloadFile(downloadURL)
     const patchOptions = {
       fantomeFilePath: fantomeFilePath,
-      leagueOfLegendsPath: 'C:\\Riot Games\\League of Legends\\Game',
+      leagueOfLegendsPath: join(leagueOfLegendsPath, 'Game'),
       cslolPath: './resources/cslol/',
       skipConflict: true,
       debugPatcher: false
@@ -99,7 +172,6 @@ app.whenReady().then(async () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
-
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.

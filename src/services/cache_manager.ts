@@ -1,17 +1,16 @@
 import axios from 'axios'
 import fs from 'fs'
 import path from 'path'
-import { app } from 'electron'
 
 const CACHE_FILE = path.resolve(__dirname, '../../resources/cache/cache.json')
 const GITHUB_API_URL = 'https://api.github.com/repos/koobzaar/lol-skins-developer/commits/main'
 
 interface Cache {
   lastCommitSha: string
-  catalog: any
+  catalog: unknown
 }
 
-export async function getCachedCatalog(): Promise<any> {
+export async function getCachedCatalog(): Promise<unknown> {
   try {
     if (fs.existsSync(CACHE_FILE)) {
       const cache: Cache = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8'))
@@ -29,7 +28,7 @@ export async function getCachedCatalog(): Promise<any> {
   return null
 }
 
-export async function updateCache(catalog: any): Promise<void> {
+export async function updateCache(catalog: unknown): Promise<void> {
   try {
     const latestCommit = await getLatestCommitSha()
     const cache: Cache = {

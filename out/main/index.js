@@ -188,7 +188,7 @@ async function downloadFile(url) {
 async function patchClientWithMod(options) {
   const {
     fantomeFilePath,
-    leagueOfLegendsPath,
+    leagueOfLegendsPath: leagueOfLegendsPath2,
     cslolPath,
     skipConflict = false,
     debugPatcher = false
@@ -211,7 +211,7 @@ async function patchClientWithMod(options) {
     "import",
     fantomeFilePath,
     modInstallPath,
-    `--game:${leagueOfLegendsPath}`
+    `--game:${leagueOfLegendsPath2}`
   ]);
   const profileName = "Default Profile";
   const profilePath = path__namespace.join(profilesPath, profileName);
@@ -221,7 +221,7 @@ async function patchClientWithMod(options) {
     "mkoverlay",
     installedPath,
     profilePath,
-    `--game:${leagueOfLegendsPath}`,
+    `--game:${leagueOfLegendsPath2}`,
     `--mods:${modName}`,
     skipConflict ? "--ignoreConflict" : ""
   ]);
@@ -229,7 +229,7 @@ async function patchClientWithMod(options) {
     "runoverlay",
     profilePath,
     profileConfigPath,
-    `--game:${leagueOfLegendsPath}`,
+    `--game:${leagueOfLegendsPath2}`,
     `--opts:${debugPatcher ? "debugpatcher" : "none"}`
   ]);
   console.log("Patcher executed successfully");
@@ -291,6 +291,52 @@ async function getLatestCommitSha() {
   }
 }
 let SKINS_CATALOG = null;
+let leagueOfLegendsPath = null;
+const LOL_PATH_FILE = path.resolve(__dirname, "../../resources/cache/lolpath.txt");
+function getStoredLoLPath() {
+  try {
+    if (fs.existsSync(LOL_PATH_FILE)) {
+      return fs.readFileSync(LOL_PATH_FILE, "utf-8");
+    }
+  } catch (error) {
+    console.error("Error reading LoL path file:", error);
+  }
+  return null;
+}
+function storeLoLPath(path2) {
+  try {
+    fs.writeFileSync(LOL_PATH_FILE, path2, "utf-8");
+  } catch (error) {
+    console.error("Error writing LoL path file:", error);
+  }
+}
+async function promptForLoLPath() {
+  const result = await electron.dialog.showOpenDialog({
+    properties: ["openFile"],
+    filters: [{ name: "Executable", extensions: ["exe"] }],
+    title: "Select League of Legends.exe"
+  });
+  if (!result.canceled && result.filePaths.length > 0) {
+    const selectedPath = result.filePaths[0];
+    const parentDir = path.dirname(selectedPath);
+    const grandParentDir = path.dirname(parentDir);
+    if (path.basename(selectedPath).toLowerCase() === "league of legends.exe" && path.basename(parentDir).toUpperCase() === "GAME" && fs.existsSync(path.join(parentDir, "DATA"))) {
+      return grandParentDir;
+    }
+  }
+  return null;
+}
+async function ensureLoLPath() {
+  leagueOfLegendsPath = getStoredLoLPath();
+  if (!leagueOfLegendsPath) {
+    leagueOfLegendsPath = await promptForLoLPath();
+    if (leagueOfLegendsPath) {
+      storeLoLPath(leagueOfLegendsPath);
+    } else {
+      throw new Error("Valid League of Legends path not provided");
+    }
+  }
+}
 async function createWindow() {
   const mainWindow = new electron.BrowserWindow({
     width: 723,
@@ -324,6 +370,13 @@ electron.app.whenReady().then(async () => {
   electron.app.on("browser-window-created", (_, window) => {
     utils.optimizer.watchWindowShortcuts(window);
   });
+  try {
+    await ensureLoLPath();
+  } catch (error) {
+    console.error("Failed to get League of Legends path:", error);
+    electron.app.quit();
+    return;
+  }
   SKINS_CATALOG = await getCachedCatalog();
   if (!SKINS_CATALOG) {
     console.log("Cache not found or outdated. Fetching new data...");
@@ -341,10 +394,13 @@ electron.app.whenReady().then(async () => {
     electron.BrowserWindow.getFocusedWindow()?.minimize();
   });
   electron.ipcMain.handle("inject-skin", async (event, downloadURL) => {
+    if (!leagueOfLegendsPath) {
+      throw new Error("League of Legends path not set");
+    }
     const fantomeFilePath = await downloadFile(downloadURL);
     const patchOptions = {
       fantomeFilePath,
-      leagueOfLegendsPath: "C:\\Riot Games\\League of Legends\\Game",
+      leagueOfLegendsPath: path.join(leagueOfLegendsPath, "Game"),
       cslolPath: "./resources/cslol/",
       skipConflict: true,
       debugPatcher: false
