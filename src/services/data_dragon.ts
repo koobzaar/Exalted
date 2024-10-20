@@ -26,6 +26,7 @@ interface DataDragonSkin {
 interface ChampionData {
   id: number
   name: string
+  alias: string
   skins: DataDragonSkin[]
 }
 
@@ -33,6 +34,7 @@ interface ProcessedSkin {
   skinName: string
   skinId: number
   downloadUrl: string
+  loadingScreenUrl: string
   chromas?: {
     chromaId: number
     chromaColors: string[]
@@ -44,6 +46,7 @@ interface ProcessedChampion {
   championName: string
   championKey: number
   championSquare: string
+  championAlias: string
   skins: ProcessedSkin[]
 }
 
@@ -69,6 +72,16 @@ async function downloadJsonIfNotExists(url: string, filePath: string): Promise<v
   }
 }
 
+function getLoadingScreenUrl(championAlias: string, skinId: number): string {
+  championAlias = championAlias.toLowerCase()
+  if (skinId === 0) {
+    return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/base/${championAlias}loadscreen.jpg`
+  } else {
+    const paddedSkinId = skinId < 10 ? `0${skinId}` : skinId.toString()
+    return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/${championAlias}/skins/skin${paddedSkinId}/${championAlias}loadscreen_${skinId}.jpg`
+  }
+}
+
 async function processChampionSkins(championSkins: ChampionSkins): Promise<ProcessedChampion[]> {
   const processedSkinsArray: ProcessedChampion[] = []
   console.log('Iniciando processamento de skins dos campeões')
@@ -83,8 +96,9 @@ async function processChampionSkins(championSkins: ChampionSkins): Promise<Proce
     }
 
     const championName = championData.name
+    const championAlias = championData.alias
     const processedSkins: ProcessedSkin[] = []
-    console.log(`Nome do campeão: ${championName}`)
+    console.log(`Nome do campeão: ${championName}, Alias: ${championAlias}`)
 
     for (const skin of skins) {
       const skinId = parseInt(skin.name.replace('.fantome', ''))
@@ -97,9 +111,11 @@ async function processChampionSkins(championSkins: ChampionSkins): Promise<Proce
         const processedSkin: ProcessedSkin = {
           skinName: dataDragonSkin.name,
           skinId: skinId,
-          downloadUrl: skin.downloadUrl
+          downloadUrl: skin.downloadUrl,
+          loadingScreenUrl: getLoadingScreenUrl(championAlias, skinId)
         }
         console.log(`Skin encontrada: ${dataDragonSkin.name}`)
+        console.log(`Loading Screen URL: ${processedSkin.loadingScreenUrl}`)
 
         if (dataDragonSkin.chromas && dataDragonSkin.chromas.length > 0) {
           processedSkin.chromas = dataDragonSkin.chromas.map((chroma) => {
@@ -128,6 +144,7 @@ async function processChampionSkins(championSkins: ChampionSkins): Promise<Proce
       championName,
       championKey: championId,
       championSquare,
+      championAlias,
       skins: processedSkins
     })
   }
@@ -160,7 +177,7 @@ async function getChampionData(championId: number): Promise<ChampionData | null>
     await downloadJsonIfNotExists(championDataUrl, championDataPath)
     const championData = JSON.parse(fs.readFileSync(championDataPath, 'utf-8'))
     console.log(`Dados do campeão obtidos para o ID: ${championId}`)
-    return championData
+    return { ...championData, alias: championSummary.alias }
   } catch (error) {
     console.error(`Erro ao buscar dados do campeão para o ID ${championId}:`, error)
     return null

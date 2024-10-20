@@ -12,17 +12,19 @@ function Skin(props): JSX.Element {
   return (
     <>
       <div className="skin-holder" style={divStyle}>
-        <div className="chromas">
-          {props.chromas.map((chroma) => (
-            <div
-              key={chroma.chromaId}
-              className="chroma-color"
-              style={{
-                background: `linear-gradient(135deg, ${chroma.chromaColors[0]} 48%, ${chroma.chromaColors[1]} 48%)`
-              }}
-            ></div>
-          ))}
-        </div>
+        {props.chromas && props.chromas.length > 0 && (
+          <div className="chromas">
+            {props.chromas.map((chroma) => (
+              <div
+                key={chroma.chromaId}
+                className="chroma-color"
+                style={{
+                  background: `linear-gradient(135deg, ${chroma.chromaColors[0]} 48%, ${chroma.chromaColors[1]} 48%)`
+                }}
+              ></div>
+            ))}
+          </div>
+        )}
       </div>
     </>
   )
