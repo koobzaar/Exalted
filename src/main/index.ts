@@ -6,8 +6,7 @@ import getLoLSkins from '../services/github'
 import processChampionSkins from '../services/data_dragon'
 import downloadFile from '../services/downloader'
 import patchClientWithMod from '../services/mod_injector'
-
-let SKINS_CATALOG: any = null
+let SKINS_CATALOG: unknown = null
 
 async function createWindow(): Promise<void> {
   // Create the browser window.
@@ -68,7 +67,12 @@ app.whenReady().then(async () => {
   ipcMain.handle('get-lol-catalog', async () => {
     return SKINS_CATALOG
   })
-
+  ipcMain.on('close-app', () => {
+    app.quit()
+  })
+  ipcMain.on('minimize-app', () => {
+    BrowserWindow.getFocusedWindow()?.minimize()
+  })
   ipcMain.handle('inject-skin', async (event, downloadURL: string) => {
     const fantomeFilePath = await downloadFile(downloadURL)
     const patchOptions = {

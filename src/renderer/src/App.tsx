@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Skin from './components/Skin/Skin'
 import './assets/App.css'
 import playButton from './assets/play-button-arrowhead.png'
+import birds from './assets/birds.png'
 
 interface ProcessedSkin {
   skinName: string
@@ -75,8 +76,8 @@ const App = (): JSX.Element => {
     const skin = champion?.skins.find((s) => s.skinId === skinId)
     if (skin) {
       console.log('Skin download URL:', skin.downloadUrl)
+      setSelectedSkinUrl(skin.downloadUrl)
     }
-    setSelectedSkinUrl(skin.downloadUrl)
   }
 
   const handleChromaClick = (skinId: number, chromaId: number): void => {
@@ -92,8 +93,8 @@ const App = (): JSX.Element => {
     const chroma = skin?.chromas?.find((c) => c.chromaId === chromaId)
     if (chroma) {
       console.log('Chroma download URL:', chroma.downloadUrl)
+      setSelectedSkinUrl(chroma.downloadUrl)
     }
-    setSelectedSkinUrl(chroma.downloadUrl)
   }
   const handleInjectClick = (): void => {
     if (selectedSkinUrl) {
@@ -109,17 +110,32 @@ const App = (): JSX.Element => {
       console.error('Nenhuma URL de skin selecionada')
     }
   }
+  const closeApp = (): void => {
+    window.electron.ipcRenderer.send('close-app')
+  }
+  const minimizeApp = (): void => {
+    window.electron.ipcRenderer.send('minimize-app')
+  }
   return (
     <>
       <div id="exalted">
         <header>
           <div className="title">
-            <h1>Exalted</h1>
-            <p>A League of Legends skin changer</p>
+            <div className="logo-title-wrapper">
+              <img id="birds-logo" src={birds} alt="Birds" />
+              <div>
+                <h1>Exalted</h1>
+                <p>A League of Legends skin changer</p>
+              </div>
+            </div>
           </div>
           <div className="close-minimize">
-            <button className="minimize"></button>
-            <button className="close" onClick={() => console.log('close')}></button>
+            <button className="minimize" onClick={minimizeApp}>
+              <p>-</p>
+            </button>
+            <button className="close" onClick={closeApp}>
+              <p>x</p>
+            </button>
           </div>
         </header>
         <main>
@@ -154,6 +170,7 @@ const App = (): JSX.Element => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
+                <div className="blank_top"></div>
                 {skins
                   .find((champion) => champion.championName === selection.championName)
                   ?.skins.map((skin) => (
@@ -175,6 +192,7 @@ const App = (): JSX.Element => {
                       />
                     </motion.div>
                   ))}
+                <div className="blank_bottom"></div>
               </motion.section>
             )}
           </AnimatePresence>
