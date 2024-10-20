@@ -49,9 +49,10 @@ async function downloadJsonIfNotExists(url, filePath) {
   }
 }
 async function processChampionSkins(championSkins) {
-  const processedSkins = {};
+  const processedSkinsArray = [];
   console.log("Iniciando processamento de skins dos campeões");
-  for (const [championId, skins] of Object.entries(championSkins)) {
+  for (const [championIdStr, skins] of Object.entries(championSkins)) {
+    const championId = parseInt(championIdStr);
     console.log(`Processando skins para o campeão com ID: ${championId}`);
     const championData = await getChampionData(championId);
     if (!championData) {
@@ -59,13 +60,13 @@ async function processChampionSkins(championSkins) {
       continue;
     }
     const championName = championData.name;
-    processedSkins[championName] = [];
+    const processedSkins = [];
     console.log(`Nome do campeão: ${championName}`);
     for (const skin of skins) {
-      const skinId = skin.name.replace(".fantome", "");
+      const skinId = parseInt(skin.name.replace(".fantome", ""));
       console.log(`Processando skin com ID: ${skinId}`);
       const dataDragonSkin = championData.skins.find(
-        (s) => s.id.toString().endsWith(skinId)
+        (s) => s.id.toString().endsWith(skinId.toString())
       );
       if (dataDragonSkin) {
         const processedSkin = {
@@ -76,7 +77,9 @@ async function processChampionSkins(championSkins) {
         console.log(`Skin encontrada: ${dataDragonSkin.name}`);
         if (dataDragonSkin.chromas && dataDragonSkin.chromas.length > 0) {
           processedSkin.chromas = dataDragonSkin.chromas.map((chroma) => {
-            const parsedChromaID = parseInt(chroma.id.toString().slice(championId.length));
+            const parsedChromaID = parseInt(
+              chroma.id.toString().slice(championId.toString().length)
+            );
             return {
               chromaId: parsedChromaID,
               chromaColors: chroma.colors,
@@ -87,14 +90,22 @@ async function processChampionSkins(championSkins) {
             `${processedSkin.chromas.length} chromas encontrados para a skin: ${dataDragonSkin.name}`
           );
         }
-        processedSkins[championName].push(processedSkin);
+        processedSkins.push(processedSkin);
       } else {
         console.log(`Skin com ID ${skinId} não encontrada para o campeão ${championName}`);
       }
     }
+    const championSquare = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${championId}.png`;
+    processedSkinsArray.push({
+      championName,
+      championKey: championId,
+      championSquare,
+      skins: processedSkins
+    });
   }
+  processedSkinsArray.sort((a, b) => a.championName.localeCompare(b.championName));
   console.log("Processamento de skins dos campeões concluído");
-  return processedSkins;
+  return processedSkinsArray;
 }
 async function getChampionData(championId) {
   try {
@@ -103,7 +114,7 @@ async function getChampionData(championId) {
     const championSummaryPath = path.join(resourcesDir, "champion-summary.json");
     await downloadJsonIfNotExists(championSummaryUrl, championSummaryPath);
     const championSummary = JSON.parse(fs.readFileSync(championSummaryPath, "utf-8")).find(
-      (champion) => champion.id.toString() === championId
+      (champion) => champion.id === championId
     );
     if (!championSummary) {
       console.error(`Campeão com ID ${championId} não encontrado no resumo`);

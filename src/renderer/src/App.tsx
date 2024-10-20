@@ -2,21 +2,32 @@ import React, { useState, useEffect } from 'react'
 import Skin from './components/Skin/Skin'
 import './assets/App.css'
 
-type LoLSkinCatalog = {
-  id: {
-    name: string
+interface ProcessedSkin {
+  skinName: string
+  skinId: number
+  downloadUrl: string
+  chromas?: {
+    chromaId: number
+    chromaColors: string[]
     downloadUrl: string
-  }
+  }[]
 }
 
-const ipcHandle = async (): Promise<LoLSkinCatalog[]> => {
+interface ProcessedChampion {
+  championName: string
+  championKey: number
+  championSquare: string
+  skins: ProcessedSkin[]
+}
+
+const ipcHandle = async (): Promise<ProcessedChampion[]> => {
   const skins = await window.electron.ipcRenderer.invoke('get-lol-catalog')
-  return skins as LoLSkinCatalog[]
+  return skins as ProcessedChampion[]
 }
 
 const App = (): JSX.Element => {
-  const [skins, setSkins] = useState<LoLSkinCatalog[]>([])
-  console.log(skins)
+  const [skins, setSkins] = useState<ProcessedChampion[]>([])
+
   useEffect(() => {
     ipcHandle()
       .then((skins) => {
@@ -26,7 +37,6 @@ const App = (): JSX.Element => {
         console.error('Erro ao obter o catálogo de skins:', error)
       })
   }, [])
-
   return (
     <>
       <div id="exalted">
@@ -46,7 +56,20 @@ const App = (): JSX.Element => {
           </div>
         </header>
         <main>
-          <aside className="champions-list"></aside>
+          <aside className="champions-list">
+            <ul className="champions">
+              {skins.map((champion) => (
+                <li key={champion.championName} className="champion-option">
+                  <img
+                    className="champion-square"
+                    src={champion.championSquare}
+                    alt={champion.championName}
+                  />
+                  <p>{champion.championName}</p>
+                </li>
+              ))}
+            </ul>
+          </aside>
           <section className="skins-list"></section>
         </main>
         <footer></footer>

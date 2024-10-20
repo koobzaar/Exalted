@@ -1,16 +1,14 @@
 import axios from 'axios'
 import fs from 'fs'
 import path from 'path'
-/*
-  TODO: THIS METHOD NEEDS TO BE REWORKED TO A MORE OPTIMIZED WAY.
-*/
+
 interface SkinInfo {
   name: string
   downloadUrl: string
 }
 
 interface ChampionSkins {
-  [championId: string]: SkinInfo[]
+  [championId: number]: SkinInfo[]
 }
 
 interface Chroma {
@@ -33,7 +31,7 @@ interface ChampionData {
 
 interface ProcessedSkin {
   skinName: string
-  skinId: string
+  skinId: number
   downloadUrl: string
   chromas?: {
     chromaId: number
@@ -42,13 +40,15 @@ interface ProcessedSkin {
   }[]
 }
 
-interface ProcessedChampionSkins {
-  [championName: string]: ProcessedSkin[]
+interface ProcessedChampion {
+  championName: string
+  championKey: number
+  championSquare: string
+  skins: ProcessedSkin[]
 }
 
 const resourcesDir = './resources/data_dragon'
 
-// Função para garantir que o diretório existe
 function ensureDirectoryExistence(dir: string): void {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true })
@@ -57,7 +57,7 @@ function ensureDirectoryExistence(dir: string): void {
 }
 
 async function downloadJsonIfNotExists(url: string, filePath: string): Promise<void> {
-  ensureDirectoryExistence(path.dirname(filePath)) // Garante que o diretório existe
+  ensureDirectoryExistence(path.dirname(filePath))
 
   if (!fs.existsSync(filePath)) {
     console.log(`Arquivo não encontrado em ${filePath}. Baixando...`)
@@ -69,11 +69,12 @@ async function downloadJsonIfNotExists(url: string, filePath: string): Promise<v
   }
 }
 
-async function processChampionSkins(championSkins: ChampionSkins): Promise<ProcessedChampionSkins> {
-  const processedSkins: ProcessedChampionSkins = {}
+async function processChampionSkins(championSkins: ChampionSkins): Promise<ProcessedChampion[]> {
+  const processedSkinsArray: ProcessedChampion[] = []
   console.log('Iniciando processamento de skins dos campeões')
 
-  for (const [championId, skins] of Object.entries(championSkins)) {
+  for (const [championIdStr, skins] of Object.entries(championSkins)) {
+    const championId = parseInt(championIdStr)
     console.log(`Processando skins para o campeão com ID: ${championId}`)
     const championData = await getChampionData(championId)
     if (!championData) {
@@ -82,14 +83,14 @@ async function processChampionSkins(championSkins: ChampionSkins): Promise<Proce
     }
 
     const championName = championData.name
-    processedSkins[championName] = []
+    const processedSkins: ProcessedSkin[] = []
     console.log(`Nome do campeão: ${championName}`)
 
     for (const skin of skins) {
-      const skinId = skin.name.replace('.fantome', '')
+      const skinId = parseInt(skin.name.replace('.fantome', ''))
       console.log(`Processando skin com ID: ${skinId}`)
       const dataDragonSkin = championData.skins.find((s: DataDragonSkin) =>
-        s.id.toString().endsWith(skinId)
+        s.id.toString().endsWith(skinId.toString())
       )
 
       if (dataDragonSkin) {
@@ -102,7 +103,9 @@ async function processChampionSkins(championSkins: ChampionSkins): Promise<Proce
 
         if (dataDragonSkin.chromas && dataDragonSkin.chromas.length > 0) {
           processedSkin.chromas = dataDragonSkin.chromas.map((chroma) => {
-            const parsedChromaID = parseInt(chroma.id.toString().slice(championId.length))
+            const parsedChromaID = parseInt(
+              chroma.id.toString().slice(championId.toString().length)
+            )
             return {
               chromaId: parsedChromaID,
               chromaColors: chroma.colors,
@@ -114,18 +117,29 @@ async function processChampionSkins(championSkins: ChampionSkins): Promise<Proce
           )
         }
 
-        processedSkins[championName].push(processedSkin)
+        processedSkins.push(processedSkin)
       } else {
         console.log(`Skin com ID ${skinId} não encontrada para o campeão ${championName}`)
       }
     }
+
+    const championSquare = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/${championId}.png`
+    processedSkinsArray.push({
+      championName,
+      championKey: championId,
+      championSquare,
+      skins: processedSkins
+    })
   }
 
+  // Ordenar o array pelo nome do campeão
+  processedSkinsArray.sort((a, b) => a.championName.localeCompare(b.championName))
+
   console.log('Processamento de skins dos campeões concluído')
-  return processedSkins
+  return processedSkinsArray
 }
 
-async function getChampionData(championId: string): Promise<ChampionData | null> {
+async function getChampionData(championId: number): Promise<ChampionData | null> {
   try {
     console.log(`Buscando dados do campeão para o ID: ${championId}`)
     const championSummaryUrl =
@@ -133,7 +147,7 @@ async function getChampionData(championId: string): Promise<ChampionData | null>
     const championSummaryPath = path.join(resourcesDir, 'champion-summary.json')
     await downloadJsonIfNotExists(championSummaryUrl, championSummaryPath)
     const championSummary = JSON.parse(fs.readFileSync(championSummaryPath, 'utf-8')).find(
-      (champion: ChampionData) => champion.id.toString() === championId
+      (champion: ChampionData) => champion.id === championId
     )
 
     if (!championSummary) {

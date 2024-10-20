@@ -58,6 +58,8 @@ app.whenReady().then(async () => {
 
   // Initialize SKINS_CATALOG
   const skins = await getLoLSkins()
+
+  // Order by the skin
   SKINS_CATALOG = await processChampionSkins(skins)
 
   // IPC handler to return SKINS_CATALOG
