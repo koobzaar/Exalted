@@ -10,3 +10,4 @@ Urgent:
 Needs to be worked later:
 
 - [ ] Fix an issue that cslol modtools injection tool doesn't return if the injection is active (therefore there's no actually way to know if worked or not)
+- [ ] Make the first champion active on program loads (show Aatrox skins)
