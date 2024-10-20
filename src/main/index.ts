@@ -6,6 +6,7 @@ import getLoLSkins from '../services/github'
 import processChampionSkins from '../services/data_dragon'
 import downloadFile from '../services/downloader'
 import patchClientWithMod from '../services/mod_injector'
+import { getCachedCatalog, updateCache } from '../services/cache_manager'
 let SKINS_CATALOG: unknown = null
 
 async function createWindow(): Promise<void> {
@@ -58,10 +59,14 @@ app.whenReady().then(async () => {
   })
 
   // Initialize SKINS_CATALOG
-  const skins = await getLoLSkins()
+  SKINS_CATALOG = await getCachedCatalog()
 
-  // Order by the skin
-  SKINS_CATALOG = await processChampionSkins(skins)
+  if (!SKINS_CATALOG) {
+    console.log('Cache not found or outdated. Fetching new data...')
+    const skins = await getLoLSkins()
+    SKINS_CATALOG = await processChampionSkins(skins)
+    await updateCache(SKINS_CATALOG)
+  }
 
   // IPC handler to return SKINS_CATALOG
   ipcMain.handle('get-lol-catalog', async () => {
