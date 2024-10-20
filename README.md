@@ -1,6 +1,6 @@
 # Exalted: League of Legends Custom Skin Injector
 
-**Exalted** is a simple yet efficient tool designed to allow League of Legends players inject official skins into their game.
+**Exalted** is a simple yet efficient tool designed to allow League of Legends players inject official skins into their game. It was made after the [brand-new skin tier](https://www.leagueoflegends.com/en-us/news/game-updates/dev-exalted-skins-the-mythic-shop-and-nexus-finishers/) announced by Riot Games!
 
 Exalted works by loading a catalog of skins from our [lol-skins-developer](https://github.com/koobzaar/lol-skins-developer) repository, allowing you to browse through a wide variety of options for each champion, and then injecting your chosen skin into the game. It's important to note that these skins are only visible to you and do not offer any gameplay advantages.
 
