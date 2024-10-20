@@ -97,7 +97,7 @@ If you want to add new skins or fix some bug, checkout the database for Exalted:
 
 Exalted is not endorsed or affiliated with Riot Games in any way. Use of this program may violate Riot Games' Terms of Service, and users should proceed with care. All League of Legends logos, champions, and skins are owned by Riot Games.
 
-### Support Us
+### Donation
 
 If you find Exalted useful and want to support its development, consider donating to help us keep the project alive:
 
