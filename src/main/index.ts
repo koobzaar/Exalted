@@ -14,8 +14,17 @@ import https from 'https'
 
 let SKINS_CATALOG: unknown = null
 let leagueOfLegendsPath: string | null = null
-const LOL_PATH_FILE = path.resolve(__dirname, '../../resources/cache/lolpath.txt')
-const CSLOL_FOLDER = path.resolve(__dirname, '../../resources/cslol')
+
+// Helper function to get the correct path for resources
+function getResourcePath(...args: string[]): string {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'resources', ...args)
+    : path.join(__dirname, '..', '..', 'resources', ...args)
+}
+
+const LOL_PATH_FILE = getResourcePath('cache', 'lolpath.txt')
+const CSLOL_FOLDER = getResourcePath('cslol')
+const CACHE_FOLDER = getResourcePath('cache')
 
 let modToolsProcess: ChildProcess | null = null
 
@@ -24,6 +33,15 @@ const REQUIRED_FILES = {
     'https://raw.githubusercontent.com/koobzaar/exalted/main/resources/cslol/mod-tools.exe',
   'cslol-dll.dll':
     'https://raw.githubusercontent.com/koobzaar/exalted/main/resources/cslol/cslol-dll.dll'
+}
+
+function ensureDirectoryExists(dirPath: string): void {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true })
+    console.log(`Created directory: ${dirPath}`)
+  } else if (!fs.statSync(dirPath).isDirectory()) {
+    throw new Error(`${dirPath} exists but is not a directory`)
+  }
 }
 
 async function downloadRequiredFile(filename: string, url: string): Promise<void> {
@@ -50,16 +68,13 @@ async function downloadRequiredFile(filename: string, url: string): Promise<void
       })
   })
 }
-
 async function verifyAndDownloadRequiredFiles(): Promise<void> {
-  // Create CSLOL_FOLDER if it doesn't exist
-  if (!fs.existsSync(CSLOL_FOLDER)) {
-    fs.mkdirSync(CSLOL_FOLDER, { recursive: true })
-  }
+  // Ensure all necessary directories exist
+  ensureDirectoryExists(CACHE_FOLDER)
+  ensureDirectoryExists(CSLOL_FOLDER)
 
   for (const [filename, url] of Object.entries(REQUIRED_FILES)) {
     const filePath = path.join(CSLOL_FOLDER, filename)
-    console.log(filePath)
     if (!fs.existsSync(filePath)) {
       console.log(`Downloading missing file: ${filename}`)
       try {
@@ -96,7 +111,7 @@ async function promptForLoLPath(): Promise<string | null> {
   const result = await dialog.showOpenDialog({
     properties: ['openFile'],
     filters: [{ name: 'Executable', extensions: ['exe'] }],
-    title: 'Select League of Legends.exe'
+    title: 'Select League of Legends.exe at League of Legends installation folder'
   })
 
   if (!result.canceled && result.filePaths.length > 0) {
@@ -168,11 +183,11 @@ app.whenReady().then(async () => {
   })
 
   try {
-    // Verify and download required files before proceeding
     await verifyAndDownloadRequiredFiles()
     await ensureLoLPath()
   } catch (error) {
     console.error('Initialization failed:', error)
+    dialog.showErrorBox('Initialization Failed', `Error: ${error}`)
     app.quit()
     return
   }
@@ -198,7 +213,7 @@ app.whenReady().then(async () => {
     BrowserWindow.getFocusedWindow()?.minimize()
   })
 
-  ipcMain.handle('inject-skin', async (event, downloadURL: string) => {
+  ipcMain.handle('inject-skin', async (_, downloadURL: string) => {
     if (!leagueOfLegendsPath) {
       throw new Error('League of Legends path not set')
     }

@@ -1,6 +1,8 @@
 import { execFile, ChildProcess } from 'child_process'
 import * as path from 'path'
 import * as fs from 'fs/promises'
+import { app } from 'electron'
+
 interface PatcherOptions {
   fantomeFilePath: string
   leagueOfLegendsPath: string
@@ -9,17 +11,23 @@ interface PatcherOptions {
   debugPatcher?: boolean
 }
 
+function getResourcePath(...args: string[]): string {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'resources', ...args)
+    : path.join(__dirname, '..', '..', 'resources', ...args)
+}
+
 async function patchClientWithMod(
   options: PatcherOptions
 ): Promise<{ success: boolean; process: ChildProcess | null }> {
   const {
     fantomeFilePath,
     leagueOfLegendsPath,
-    cslolPath,
     skipConflict = false,
     debugPatcher = false
   } = options
 
+  const cslolPath = getResourcePath('cslol')
   const modToolsPath = path.join(cslolPath, 'mod-tools.exe')
   const installedPath = path.join(cslolPath, 'installed')
   const profilesPath = path.join(cslolPath, 'profiles')
@@ -93,6 +101,7 @@ async function patchClientWithMod(
     }, 2000) // 2 seconds delay
   })
 }
+
 function execPromise(command: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     execFile(command, args, (error) => {
