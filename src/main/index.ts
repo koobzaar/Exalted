@@ -4,6 +4,8 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png'
 import getLoLSkins from '../services/github'
 import processChampionSkins from '../services/data_dragon'
+import downloadFile from '../services/downloader'
+import patchClientWithMod from '../services/mod_injector'
 
 let SKINS_CATALOG: any = null
 
@@ -65,6 +67,19 @@ app.whenReady().then(async () => {
   // IPC handler to return SKINS_CATALOG
   ipcMain.handle('get-lol-catalog', async () => {
     return SKINS_CATALOG
+  })
+
+  ipcMain.handle('inject-skin', async (event, downloadURL: string) => {
+    const fantomeFilePath = await downloadFile(downloadURL)
+    const patchOptions = {
+      fantomeFilePath: fantomeFilePath,
+      leagueOfLegendsPath: 'C:\\Riot Games\\League of Legends\\Game',
+      cslolPath: './resources/cslol/',
+      skipConflict: true,
+      debugPatcher: false
+    }
+    await patchClientWithMod(patchOptions)
+    console.log('Skin injected')
   })
 
   await createWindow()

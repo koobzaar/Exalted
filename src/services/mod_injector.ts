@@ -72,6 +72,8 @@ async function patchClientWithMod(options: PatcherOptions): Promise<void> {
     `--game:${leagueOfLegendsPath}`,
     `--opts:${debugPatcher ? 'debugpatcher' : 'none'}`
   ])
+  console.log('Patcher executed successfully')
+  return Promise.resolve()
 }
 
 function execPromise(command: string, args: string[]): Promise<void> {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Skin from './components/Skin/Skin'
 import './assets/App.css'
@@ -42,6 +42,7 @@ const App = (): JSX.Element => {
     skinId: null,
     chromaId: null
   })
+  const [selectedSkinUrl, setSelectedSkinUrl] = useState<string | null>(null)
 
   useEffect(() => {
     ipcHandle()
@@ -53,7 +54,7 @@ const App = (): JSX.Element => {
       })
   }, [])
 
-  const handleChampionClick = (championName: string) => {
+  const handleChampionClick = (championName: string): void => {
     setSelection((prev) => ({
       ...prev,
       championName,
@@ -62,7 +63,7 @@ const App = (): JSX.Element => {
     }))
   }
 
-  const handleSkinClick = (skinId: number) => {
+  const handleSkinClick = (skinId: number): void => {
     setSelection((prev) => ({
       ...prev,
       skinId,
@@ -75,9 +76,10 @@ const App = (): JSX.Element => {
     if (skin) {
       console.log('Skin download URL:', skin.downloadUrl)
     }
+    setSelectedSkinUrl(skin.downloadUrl)
   }
 
-  const handleChromaClick = (skinId: number, chromaId: number) => {
+  const handleChromaClick = (skinId: number, chromaId: number): void => {
     setSelection((prev) => ({
       ...prev,
       skinId,
@@ -91,8 +93,22 @@ const App = (): JSX.Element => {
     if (chroma) {
       console.log('Chroma download URL:', chroma.downloadUrl)
     }
+    setSelectedSkinUrl(chroma.downloadUrl)
   }
-
+  const handleInjectClick = (): void => {
+    if (selectedSkinUrl) {
+      window.electron.ipcRenderer
+        .invoke('inject-skin', selectedSkinUrl)
+        .then(() => {
+          console.log('Skin injected successfully')
+        })
+        .catch((error) => {
+          console.error('Erro ao injetar a skin:', error)
+        })
+    } else {
+      console.error('Nenhuma URL de skin selecionada')
+    }
+  }
   return (
     <>
       <div id="exalted">
@@ -166,7 +182,7 @@ const App = (): JSX.Element => {
         <footer>
           <div className="info"></div>
           <div className="inject-button">
-            <button id="inject" onClick={() => console.log('inject')}>
+            <button id="inject" onClick={handleInjectClick}>
               <img id="play-button" src={playButton} alt="Play button" />
             </button>
           </div>

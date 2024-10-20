@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import './Skin.css'
 
@@ -25,22 +25,15 @@ function Skin({
   onSkinClick,
   onChromaClick
 }: SkinProps): JSX.Element {
-  const [imageLoadError, setImageLoadError] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const skinRef = useRef<HTMLDivElement>(null)
-
-  const handleImageError = (): void => {
-    setImageLoadError(true)
-    setIsLoading(false)
-  }
 
   useEffect(() => {
     const img = new Image()
     img.src = backgroundImage
-    img.onload = () => {
+    img.onload = (): void => {
       setIsLoading(false)
     }
-    img.onerror = handleImageError
   }, [backgroundImage])
 
   useEffect(() => {
