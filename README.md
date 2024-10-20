@@ -6,11 +6,12 @@ Urgent:
 
 - [ ] Fix the issue that it takes a lot of time to open the program for the first time because of the active downloads of data dragon files
 - [x] Cache the catalog and the last commit in case of skin change
-- [ ] Fix the issue that .exe files are not unpacked on dist (maybe i need to download directly from cslol)
+- [ ] Fix the issue that .exe files are not unpacked on dist (maybe I need to download directly from cslol)
 - [x] Make a alert to tell the user that the injection was successful
 - [x] Make a animation for the "play" button (that will probably be changed)
 - [x] Prompt the user for the lol installation folder on first run
 - [ ] Write a more beautiful alert
+- [ ] Add a better way to show the selected skin/chroma - that border sucks
 
 Needs to be worked later:
 
