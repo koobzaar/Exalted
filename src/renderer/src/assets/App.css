@@ -151,6 +151,8 @@ main .skins-list {
   background-color: inherit;
   overflow: scroll;
   display: flex;
+  align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
   overflow-x: hidden;

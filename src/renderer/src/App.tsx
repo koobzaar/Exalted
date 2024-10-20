@@ -72,7 +72,6 @@ const App = (): JSX.Element => {
                   key={champion.championName}
                   className={`champion-option ${selectedChampion === champion.championName ? 'selected' : ''}`}
                   onClick={() => handleChampionClick(champion.championName)}
-                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <div className="champion-square-holder">
