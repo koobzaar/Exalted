@@ -120,6 +120,7 @@ main aside::-webkit-scrollbar-track {
 }
 
 main aside ul .champions {
+  background-color: red;
   margin: 0;
 }
 main aside #champion-name {

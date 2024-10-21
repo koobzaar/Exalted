@@ -7,7 +7,7 @@ import birds from './assets/birds.png'
 import loading from './assets/loading.png'
 import stop from './assets/stop.png'
 import CustomAlert from './components/Alert/Alert'
-
+import ChampionsList from './components/ChampionsList/ChampionsList'
 interface ProcessedSkin {
   skinName: string
   skinId: number
@@ -184,27 +184,12 @@ const App = (): JSX.Element => {
           </div>
         </header>
         <main>
-          <aside className="champions-list">
-            <ul className="champions">
-              {skins.map((champion) => (
-                <motion.li
-                  key={champion.championName}
-                  className={`champion-option ${selection.championName === champion.championName ? 'selected' : ''}`}
-                  onClick={() => handleChampionClick(champion.championName)}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div className="champion-square-holder">
-                    <img
-                      className="champion-square"
-                      src={champion.championSquare}
-                      alt={champion.championName}
-                    />
-                  </div>
-                  <p id="champion-name">{champion.championName}</p>
-                </motion.li>
-              ))}
-            </ul>
-          </aside>
+          <ChampionsList
+            skins={skins}
+            selection={selection}
+            onChampionClick={handleChampionClick}
+          />
+
           <AnimatePresence mode="wait">
             {selection.championName && (
               <motion.section
