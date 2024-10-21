@@ -32,13 +32,13 @@ async function patchClientWithMod(
   const installedPath = path.join(cslolPath, 'installed')
   const profilesPath = path.join(cslolPath, 'profiles')
 
-  // Remove contents of installed and profiles folders
+  // Remove only contents of installed and profiles folders
   try {
     await fs.rm(installedPath, { recursive: true, force: true })
     await fs.rm(profilesPath, { recursive: true, force: true })
     console.log(`Deleted contents of ${installedPath} and ${profilesPath}`)
   } catch (deleteError) {
-    console.error(`Error deleting contents of ${installedPath} or ${profilesPath}: ${deleteError}`)
+    console.error(`Error deleting directory contents: ${deleteError}`)
   }
 
   // Recreate the directories

@@ -1,19 +1,29 @@
 import axios from 'axios'
 import fs from 'fs'
 import path from 'path'
+import { promises as fsPromises } from 'fs'
 
 async function downloadFile(url: string): Promise<string> {
   const fileName = path.basename(url)
   const outputFolder = './resources/fantome_files/'
   const filePath = path.join(outputFolder, fileName)
 
-  // Garante que o diretório existe
-  if (!fs.existsSync(outputFolder)) {
-    fs.mkdirSync(outputFolder, { recursive: true })
-    console.log(`Diretório criado: ${outputFolder}`)
-  }
-
   try {
+    // Clean up the fantome_files directory if it exists
+    if (fs.existsSync(outputFolder)) {
+      const files = await fsPromises.readdir(outputFolder)
+      for (const file of files) {
+        await fsPromises.unlink(path.join(outputFolder, file))
+      }
+      console.log(`Cleaned up directory: ${outputFolder}`)
+    }
+
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(outputFolder)) {
+      await fsPromises.mkdir(outputFolder, { recursive: true })
+      console.log(`Directory created: ${outputFolder}`)
+    }
+
     const response = await axios({
       url,
       method: 'GET',
@@ -28,7 +38,7 @@ async function downloadFile(url: string): Promise<string> {
       writer.on('error', reject)
     })
   } catch (error) {
-    console.error(`Erro ao baixar o arquivo da URL ${url}:`, error)
+    console.error(`Error downloading file from URL ${url}:`, error)
     throw error
   }
 }

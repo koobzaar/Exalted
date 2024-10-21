@@ -290,4 +290,8 @@ footer .inject-button #loading-icon {
   color: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition: color 0.8s ease;
+}
+.info a:hover {
+  color: var(--primary);
 }
