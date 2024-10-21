@@ -98,4 +98,4 @@ If you find Exalted useful and want to support its development, consider donatin
 - **Pix**: b2763e55-ac97-4963-83e9-d9827caed2de
 - **Ko-Fi**: [Support on Ko-Fi](https://ko-fi.com/koobzaar)
 
-Thank you for using Exalted! Enjoy exploring custom skins and making your gameplay experience more personal!
+
