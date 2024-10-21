@@ -77,14 +77,6 @@ graph TD
     V --> K
 ```
 
-### FAQ
-
-**Q: Can I get banned for using Exalted?**  
-A: Using custom skins in League of Legends comes with some risk, as any modification to the game client can violate Riot Games' Terms of Service. That said, Exalted skins are purely visual and do not offer any gameplay advantages, but users should proceed with caution.
-
-**Q: How do I update Exalted when League of Legends is updated?**  
-A: Exalted will automatically download newer skins from our repository. If you want to get the newer version - keep looking at the releases folder.
-
 ### Contributing to Exalted
 
 Contributions to Exalted are welcomed! Whether it’s by submitting new skins, improving the user interface, or fixing bugs, here’s how you can contribute:
