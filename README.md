@@ -52,10 +52,10 @@ graph TD
     C -->|Present| E[Ensure LoL Path]
     D --> E
     E --> F[Load Skin Catalog]
-    F -->|Cache Exists| G[Check Cache Validity]
-    F -->|No Cache| H[Fetch New Data from LoL-Skins-Developer repository ]
-    G -->|Valid| I[Use Cached Catalog]
-    G -->|Invalid| H
+    F -->|Cache Exists| G[Cache last commit signature is the same from lol-skins-developer?]
+    F -->|No Cache| H[Fetch new data from lol-skins-developer repository ]
+    G -->|Same signature| I[Use Cached Catalog]
+    G -->|Different signature| H
     H --> J[Process skins and update cache]
     I --> K[Render UI]
     J --> K
